@@ -5,6 +5,7 @@ import com.linexperts.alfa.dto.InvoiceOutputDto;
 import com.linexperts.alfa.dto.Status;
 import com.linexperts.alfa.entity.Invoice;
 import com.linexperts.alfa.entity.Policy;
+import com.linexperts.alfa.exception.GlobalException;
 import com.linexperts.alfa.repository.InvoiceRepository;
 import com.linexperts.alfa.repository.PolicyRepository;
 import java.time.LocalDate;
@@ -39,7 +40,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                   cost.set(cost.get() + policy1.getCost());
                   policySet.add(policy1);
                 }, () -> {
-                  throw new RuntimeException();
+                  throw new GlobalException();
                 })
             );
 
