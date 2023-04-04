@@ -1,14 +1,18 @@
 package com.linexperts.alfa.service;
 
-import com.linexperts.alfa.dto.InvoiceDto;
+import com.linexperts.alfa.dto.InvoiceInputDto;
+import com.linexperts.alfa.dto.InvoiceOutputDto;
+import com.linexperts.alfa.dto.Status;
 import com.linexperts.alfa.entity.Invoice;
 import com.linexperts.alfa.entity.Policy;
 import com.linexperts.alfa.repository.InvoiceRepository;
 import com.linexperts.alfa.repository.PolicyRepository;
-import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +29,7 @@ public class InvoiceServiceImpl implements InvoiceService {
   private PolicyRepository policyRepository;
 
   @Override
-  public void createInvoice(InvoiceDto invoiceDto) {
+  public void createInvoice(InvoiceInputDto invoiceDto) {
     AtomicReference<Float> cost = new AtomicReference<>(0f);
     Set<Policy> policySet = new HashSet<>();
     invoiceDto.getPoliciesIdsList().stream().forEach(
@@ -48,5 +52,44 @@ public class InvoiceServiceImpl implements InvoiceService {
         .build();
 
     invoiceRepository.save(invoice);
+  }
+
+  @Override
+  public InvoiceOutputDto getInvoice(UUID invoiceId) {
+    var invoiceOptional = invoiceRepository.findById(invoiceId);
+
+    if (invoiceOptional.isPresent()){
+      var invoice = invoiceOptional.get();
+      return mapToInvoiceDto(invoice);
+    }
+
+    return InvoiceOutputDto
+        .builder().build();
+  }
+
+  @Override
+  public List<InvoiceOutputDto> getAllInvoices() {
+    var invoiceList = invoiceRepository.findAll();
+
+    var invoiceDtoList = new ArrayList<InvoiceOutputDto>();
+
+    invoiceList.stream().forEach(
+        invoice -> invoiceDtoList.add(mapToInvoiceDto(invoice))
+    );
+
+    return invoiceDtoList;
+  }
+
+  private InvoiceOutputDto mapToInvoiceDto(Invoice invoice) {
+    ArrayList<UUID> policies = new ArrayList<>();
+    invoice.getPolicies().stream().forEach(p -> policies.add(p.getId()));
+    return InvoiceOutputDto
+        .builder()
+        .status(Status.valueOf(invoice.getStatus()))
+        .policiesIdsList(policies)
+        .customerId(invoice.getCustomerId())
+        .dateCreated(invoice.getCreatedDate())
+        .cost(invoice.getCost())
+        .build();
   }
 }
