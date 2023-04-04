@@ -6,5 +6,4 @@ public class GlobalException extends RuntimeException {
     super("Something strange happened");
   }
 
-
 }

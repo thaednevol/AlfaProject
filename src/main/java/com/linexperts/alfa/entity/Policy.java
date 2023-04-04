@@ -35,7 +35,6 @@ public class Policy implements Serializable  {
   @Column(name = "cost", nullable = false)
   private Float cost;
 
-  @ManyToMany(mappedBy = "policies")
-  Set<Invoice> invoices;
+
 
 }
